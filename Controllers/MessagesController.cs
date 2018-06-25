@@ -24,7 +24,7 @@ namespace Microsoft.Bot.Sample.QnABot
             // check if activity is of type message
             if (activity.GetActivityType() == ActivityTypes.Message)
             {
-                await Conversation.SendAsync(activity, () => new QnaDialog());
+                await Conversation.SendAsync(activity, () => new RootDialog());
             }
             else
             {

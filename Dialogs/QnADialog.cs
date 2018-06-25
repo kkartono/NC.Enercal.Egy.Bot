@@ -8,9 +8,63 @@ using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.CognitiveServices.QnAMaker;
 using Newtonsoft.Json.Linq;
 using System.Threading;
+using Microsoft.Bot.Builder.Azure;
 
 namespace Microsoft.Bot.Sample.QnABot
 {
+
+    [Serializable]
+    public class RootDialog : IDialog<object>
+    {
+        public async Task StartAsync(IDialogContext context)
+        {
+            /* Wait until the first message is received from the conversation and call MessageReceviedAsync 
+            *  to process that message. */
+            context.Wait(this.MessageReceivedAsync);
+        }
+
+        private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> result)
+        {
+            /* When MessageReceivedAsync is called, it's passed an IAwaitable<IMessageActivity>. To get the message,
+             *  await the result. */
+            var message = await result;
+
+            var qnaAuthKey = ConfigurationManager.AppSettings["QnAAuthKey"];
+            var qnaKBId = ConfigurationManager.AppSettings["QnAKnowledgebaseId"];
+            var endpointHostName = ConfigurationManager.AppSettings["QnAEndpointHostName"];
+
+            // QnA Subscription Key and KnowledgeBase Id null verification
+            if (!string.IsNullOrEmpty(qnaAuthKey) && !string.IsNullOrEmpty(qnaKBId))
+            {
+                // Forward to the appropriate Dialog based on whether the endpoint hostname is present
+                if (string.IsNullOrEmpty(endpointHostName))
+                    await context.Forward(new QnaDialog(), AfterAnswerAsync, message, CancellationToken.None);
+                else
+                    await context.Forward(new QnaDialog(), AfterAnswerAsync, message, CancellationToken.None);
+            }
+            else
+            {
+                await context.PostAsync("Please set QnAKnowledgebaseId, QnAAuthKey and QnAEndpointHostName (if applicable) in App Settings. Learn how to get them at https://aka.ms/qnaabssetup.");
+            }
+        }
+
+        private async Task AfterAnswerAsync(IDialogContext context, IAwaitable<IMessageActivity> result)
+        {
+            // wait for the next user message
+            context.Wait(MessageReceivedAsync);
+        }
+
+        public static string GetSetting(string key)
+        {
+            var value = Utils.GetAppSetting(key);
+            if (String.IsNullOrEmpty(value) && key == "QnAAuthKey")
+            {
+                value = Utils.GetAppSetting("QnASubscriptionKey"); // QnASubscriptionKey for backward compatibility with QnAMaker (Preview)
+            }
+            return value;
+        }
+    }
+
     [Serializable]
     public class QnaDialog : QnAMakerDialog
     {
@@ -23,51 +77,11 @@ namespace Microsoft.Bot.Sample.QnABot
 
         }
 
-        protected override async Task RespondFromQnAMakerResultAsync(IDialogContext context, IMessageActivity message, QnAMakerResults result)
-        {
-            // answer is a string
-            var answer = result.Answers.First().Answer;
-
-            Activity reply = ((Activity)context.Activity).CreateReply();
-
-            string[] qnaAnswerData = answer.Split(';');
-            //int dataSize = qnaAnswerData.Length;
-
-            //string title = qnaAnswerData[0];
-            string title = "Title";
-            string description = qnaAnswerData[0];
-            string imageURL = "https://www.w3schools.com/w3css/img_lights.jpg";
-            string url = "https://www.w3schools.com/w3css/img_lights.jpg";
-            //string url = qnaAnswerData[2];
-            //string imageURL = qnaAnswerData[3];
-
-            HeroCard card = new HeroCard
-            {
-                Title = title,
-                Subtitle = description,
-            };
-
-            //card.Buttons = new List<CardAction>
-            //{
-            //    new CardAction(ActionTypes.OpenUrl, "Learn More", value: url)
-            //};
-
-            card.Images = new List<CardImage>
-            {
-                new CardImage( url = imageURL)
-            };
-
-            reply.Attachments.Add(card.ToAttachment());
-
-
-            await context.PostAsync(reply);
-        }
-
         protected override async Task DefaultWaitNextMessageAsync(IDialogContext context, IMessageActivity message, QnAMakerResults result)
         {
             //// get the URL
-            var answer = result.Answers.First().Answer;
-            string[] qnaAnswerData = answer.Split(';');
+            //var answer = result.Answers.First().Answer;
+            //string[] qnaAnswerData = answer.Split(';');
             //string qnaURL = qnaAnswerData[2];
             string qnaURL = "";
 

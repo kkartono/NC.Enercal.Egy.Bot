@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Connector;
 using System.Threading.Tasks;
-//using Microsoft.ApplicationInsights;
-using Newtonsoft.Json;
+using QnABot.DataServices;
+using System.Configuration;
 
 namespace Microsoft.Bot.Sample.QnABot
 {
@@ -14,11 +14,16 @@ namespace Microsoft.Bot.Sample.QnABot
         private string qnaURL;
         private string userQuestion;
 
+        private IFeedbackRepository _repository;
+
         public FeedbackDialog(string url, string question)
         {
+            string conn = ConfigurationManager.ConnectionStrings["BotDataContextConnectionString"].ConnectionString;
+            _repository = new FeedbackRepository(conn);
+
             // keep track of data associated with feedback
-            qnaURL = url;
-            userQuestion = question;
+            this.qnaURL = url;
+            this.userQuestion = question;
         }
 
         public async Task StartAsync(IDialogContext context)
@@ -43,61 +48,31 @@ namespace Microsoft.Bot.Sample.QnABot
         {
             var userFeedback = await result;
 
-            List<Data> _data = new List<Data>();
-            string json = "";
-
-            if (userFeedback.Text.Contains("yes-positive-feedback") || userFeedback.Text.Contains("no-negative-feedback"))
+            switch (userFeedback.Text.ToLower())
             {
-                // create telemetry client to post to Application Insights 
-                //TelemetryClient telemetry = new TelemetryClient();
-
-                if (userFeedback.Text.Contains("yes-positive-feedback"))
-                {
-                    _data.Add(new Data()
+                case "yes-positive-feedback":
+                    await _repository.SaveAsync(new FeedbackEntity()
                     {
-                        question = userQuestion,
-                        feedback = "satisfied"
+                        Question = userQuestion,
+                        Feedback = "satisfied"
                     });
+                    break;
 
-                    json = JsonConvert.SerializeObject(_data.ToArray());
-                    //System.IO.File.WriteAllText(@"D:\Karen\feedback.txt", json);
-                    System.IO.File.AppendAllText(@"D:\Karen\feedback.json", json);
-
-                    // post feedback to App Insights
-                    //var properties = new Dictionary<string, string>
-                    //{
-                    //    {"Question", userQuestion },
-                    //    {"URL", qnaURL },
-                    //    {"Vote", "Yes" }
-                    //    // add properties relevant to your bot 
-                    //};
-
-                    //telemetry.TrackEvent("Yes-Vote", properties);
-                }
-                else if (userFeedback.Text.Contains("no-negative-feedback"))
-                {
-                    // post feedback to App Insights
-                    _data.Add(new Data()
+                case "no-negative-feedback":
+                    await _repository.SaveAsync(new FeedbackEntity()
                     {
-                        question = userQuestion,
-                        feedback = "not satisfied"
+                        Question = userQuestion,
+                        Feedback = "not satisfied"
                     });
+                    break;
 
-                    json = JsonConvert.SerializeObject(_data.ToArray());
-                    //System.IO.File.WriteAllText(@"D:\Karen\feedback.txt", json);
-                    System.IO.File.AppendAllText(@"D:\Karen\feedback.json", json);
-                }
-
-                await context.PostAsync("Merci de votre retour!");
-
-                context.Done<IMessageActivity>(null);
-            }
-            else
-            {
-                // no feedback, return to QnA dialog
-                context.Done<IMessageActivity>(userFeedback);
+                default:
+                    context.Done(userFeedback);
+                    return;
             }
 
+            await context.PostAsync("Merci de votre retour!");
+            context.Done<IMessageActivity>(null);
         }
     }
 }
