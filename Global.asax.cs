@@ -1,12 +1,7 @@
 using Autofac;
 using System.Web.Http;
-using System.Configuration;
-using System.Reflection;
-using Microsoft.Bot.Builder.Azure;
 using Microsoft.Bot.Builder.Dialogs;
-using Microsoft.Bot.Builder.Dialogs.Internals;
-using Microsoft.Bot.Connector;
-using QnABot.SqlServiceServices;
+using QnABot.DataServices;
 
 namespace SimpleEchoBot
 {
@@ -16,7 +11,12 @@ namespace SimpleEchoBot
         {
             GlobalConfiguration.Configure(WebApiConfig.Register);
 
-            //var builder = new ContainerBuilder();
+            var builder = new ContainerBuilder();
+
+            builder.Register(c => new FeedbackRepository())
+                .As<IFeedbackRepository>()
+                .SingleInstance();
+
             //builder.RegisterModule(new DialogModule());
 
             //builder.Register(c => new FeedbackDataStore("BotDatastoreContextConnectionString"))
@@ -24,7 +24,7 @@ namespace SimpleEchoBot
             //    .AsSelf()
             //    .InstancePerLifetimeScope();
 
-            //builder.Update(Conversation.Container);
+            builder.Update(Conversation.Container);
         }
     }
 }

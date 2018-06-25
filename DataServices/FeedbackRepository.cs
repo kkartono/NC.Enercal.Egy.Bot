@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
@@ -10,9 +11,9 @@ namespace QnABot.DataServices
     {
         private string _dbConString { get; set; }
 
-        public FeedbackRepository(string connString)
+        public FeedbackRepository()
         {
-            _dbConString = connString;
+            _dbConString = ConfigurationManager.ConnectionStrings["BotDataContextConnectionString"].ConnectionString;
         }
 
         public async Task SaveAsync(FeedbackEntity entity)

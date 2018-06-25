@@ -11,18 +11,15 @@ namespace Microsoft.Bot.Sample.QnABot
     [Serializable]
     public class FeedbackDialog : IDialog<IMessageActivity>
     {
-        private string qnaURL;
         private string userQuestion;
 
-        private IFeedbackRepository _repository;
+        [NonSerialized]
+        private readonly IFeedbackRepository _repository;
 
-        public FeedbackDialog(string url, string question)
+        public FeedbackDialog(string url, string question, IFeedbackRepository feedbackRepository)
         {
-            string conn = ConfigurationManager.ConnectionStrings["BotDataContextConnectionString"].ConnectionString;
-            _repository = new FeedbackRepository(conn);
+            _repository = feedbackRepository;
 
-            // keep track of data associated with feedback
-            this.qnaURL = url;
             this.userQuestion = question;
         }
 
@@ -41,7 +38,7 @@ namespace Microsoft.Bot.Sample.QnABot
 
             await context.PostAsync(feedback);
 
-            context.Wait(this.MessageReceivedAsync);
+            context.Wait(MessageReceivedAsync);
         }
 
         public async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> result)

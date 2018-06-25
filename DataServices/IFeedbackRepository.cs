@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace QnABot.DataServices
 {
-    interface IFeedbackRepository
+    public interface IFeedbackRepository
     {
         Task SaveAsync(FeedbackEntity entity);
     }

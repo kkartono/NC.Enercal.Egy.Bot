@@ -9,6 +9,7 @@ using Microsoft.Bot.Builder.CognitiveServices.QnAMaker;
 using Newtonsoft.Json.Linq;
 using System.Threading;
 using Microsoft.Bot.Builder.Azure;
+using QnABot.DataServices;
 
 namespace Microsoft.Bot.Sample.QnABot
 {
@@ -68,6 +69,7 @@ namespace Microsoft.Bot.Sample.QnABot
     [Serializable]
     public class QnaDialog : QnAMakerDialog
     {
+
         public QnaDialog() : base(new QnAMakerService(new QnAMakerAttribute
             (ConfigurationManager.AppSettings["QnAAuthKey"],
             ConfigurationManager.AppSettings["QnAKnowledgebaseId"],
