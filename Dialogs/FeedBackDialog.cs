@@ -13,13 +13,9 @@ namespace Microsoft.Bot.Sample.QnABot
     {
         private string userQuestion;
 
-        [NonSerialized]
-        private readonly IFeedbackRepository _repository;
 
-        public FeedbackDialog(string url, string question, IFeedbackRepository feedbackRepository)
+        public FeedbackDialog(string url, string question)
         {
-            _repository = feedbackRepository;
-
             this.userQuestion = question;
         }
 
@@ -43,6 +39,8 @@ namespace Microsoft.Bot.Sample.QnABot
 
         public async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> result)
         {
+            var _repository = new FeedbackRepository(); // TODO : respecter cycle vie Dialog + DI
+
             var userFeedback = await result;
 
             switch (userFeedback.Text.ToLower())
