@@ -14,7 +14,7 @@ namespace Microsoft.Bot.Sample.QnABot
         private string userQuestion;
 
 
-        public FeedbackDialog(string url, string question)
+        public FeedbackDialog(/*string url,*/ string question)
         {
             this.userQuestion = question;
         }
@@ -67,7 +67,6 @@ namespace Microsoft.Bot.Sample.QnABot
             }
 
             await context.PostAsync("Merci de votre retour!");
-            context.Done<IMessageActivity>(null);
         }
     }
 }

@@ -90,7 +90,7 @@ namespace Microsoft.Bot.Sample.QnABot
             //// pass user's question
             var userQuestion = (context.Activity as Activity).Text;
 
-            context.Call(new FeedbackDialog(qnaURL, userQuestion), ResumeAfterFeedback);
+            context.Call(new FeedbackDialog(/*qnaURL,*/ userQuestion), ResumeAfterFeedback);
         }
 
         private async Task ResumeAfterFeedback(IDialogContext context, IAwaitable<IMessageActivity> result)

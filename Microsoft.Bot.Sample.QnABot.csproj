@@ -178,6 +178,7 @@
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\MessagesController.cs" />
+    <Compile Include="Dialogs\RootLuisDialog.cs" />
     <Compile Include="DataServices\FeedbackDbContext.cs" />
     <Compile Include="DataServices\FeedbackEntity.cs" />
     <Compile Include="DataServices\FeedbackRepository.cs" />

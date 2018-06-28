@@ -11,11 +11,11 @@ namespace SimpleEchoBot
         {
             GlobalConfiguration.Configure(WebApiConfig.Register);
 
-            var builder = new ContainerBuilder();
+            /*var builder = new ContainerBuilder();
 
             builder.Register(c => new FeedbackRepository())
                 .As<IFeedbackRepository>()
-                .SingleInstance();
+                .SingleInstance();*/
 
             //builder.RegisterModule(new DialogModule());
 
@@ -24,7 +24,7 @@ namespace SimpleEchoBot
             //    .AsSelf()
             //    .InstancePerLifetimeScope();
 
-            builder.Update(Conversation.Container);
+            //builder.Update(Conversation.Container);
         }
     }
 }
